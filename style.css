@@ -152,6 +152,28 @@ input:checked + .slider:before {
   background: var(--accent-hover);
 }
 
+/* Past Due Column */
+#PAST_DUE h3 {
+  border-bottom-color: #e74c3c;
+}
+
+/* Overdue task style */
+#PAST_DUE .task,
+.task.overdue {
+  border-left-color: #e74c3c !important;
+  background: rgba(231, 76, 60, 0.12);
+}
+
+/* Slight pulse effect for attention */
+.task.overdue {
+  animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 0 rgba(231,76,60,0.3); }
+  to   { box-shadow: 0 0 12px rgba(231,76,60,0.5); }
+}
+
 .board { 
   display: flex; 
   gap: 1.5rem;

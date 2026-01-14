@@ -20,4 +20,4 @@ for msg in consumer:
     elif msg.topic == "task.completed":
         print("✅ Completed:", task["title"])
     elif msg.topic == "task.overdue":
-        print("⚠️ Overdue:", task["title"], "→", task["assigned_to"])
+        print("⚠️ OVERDUE:", task["title"], "→", task["assigned_to"])

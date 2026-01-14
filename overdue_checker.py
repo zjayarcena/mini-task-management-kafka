@@ -12,13 +12,15 @@ producer = KafkaProducer(
 while True:
     try:
         tasks = requests.get("http://127.0.0.1:5000/tasks").json()
-        today = datetime.now().date()
+        now = datetime.now()
 
         for task in tasks:
             if task["status"] != "DONE":
-                due = datetime.strptime(task["due_date"], "%Y-%m-%d").date()
-                if due < today:
+                due = datetime.fromisoformat(task["due_date"])
+                if due < now and not task["overdue"]:
+                    task["overdue"] = True
                     producer.send("task.overdue", task)
+
     except:
         pass
 

@@ -25,9 +25,10 @@ def create_task():
     task = {
         "id": len(tasks) + 1,
         "title": data["title"],
-        "assigned_to": data["assigned_to"],
+        "assigned_to": data.get("assigned_to", ""),
         "status": "TODO",
         "due_date": data["due_date"],
+        "overdue": False,
         "created_at": datetime.now().isoformat()
     }
 
@@ -46,6 +47,7 @@ def update_task(task_id):
             producer.send("task.updated", task)
 
             if status == "DONE":
+                task["overdue"] = False
                 producer.send("task.completed", task)
 
             return jsonify(task)
