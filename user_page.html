@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Tasks - Task Manager</title>
+<link rel="stylesheet" href="user_style.css">
+</head>
+<body>
+
+<div class="header">
+  <div class="user-info">
+    <h2>My Tasks</h2>
+    <div class="current-user">
+      <span class="user-icon">👤</span>
+      <select id="userSelect" class="user-dropdown" onchange="saveUsername()">
+        <option value="">Select your user... </option>
+        <option value="user1">user1</option>
+        <option value="user2">user2</option>
+        <option value="user3">user3</option>
+      </select>
+    </div>
+  </div>
+  <div class="theme-switch">
+    <span class="theme-icon">☀️</span>
+    <label class="switch">
+      <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+      <span class="slider"></span>
+    </label>
+    <span class="theme-icon">🌙</span>
+  </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-number" id="todoCount">0</div>
+    <div class="stat-label">To Do</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="inProgressCount">0</div>
+    <div class="stat-label">In Progress</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="doneCount">0</div>
+    <div class="stat-label">Completed</div>
+  </div>
+  <div class="stat-card alert">
+    <div class="stat-number" id="overdueCount">0</div>
+    <div class="stat-label">Overdue</div>
+  </div>
+</div>
+
+<div class="board">
+  <div class="column" id="TODO"><h3>To Do</h3></div>
+  <div class="column" id="IN_PROGRESS"><h3>In Progress</h3></div>
+  <div class="column" id="DONE"><h3>Done</h3></div>
+  <div class="column" id="PAST_DUE"><h3>Past Due</h3></div>
+</div>
+
+<script src="user_script.js"></script>
+
+</body>
+</html>

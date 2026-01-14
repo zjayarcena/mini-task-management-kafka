@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin - Task Manager</title>
+<link rel="stylesheet" href="admin_style.css">
+</head>
+<body>
+
+<div class="header">
+  <h2>Kanban Board <span class="admin-badge">Admin</span></h2>
+  <div class="header-actions">
+    <button class="manage-users-btn" onclick="toggleUserManager()">👥 Manage Users</button>
+    <div class="theme-switch">
+      <span class="theme-icon">☀️</span>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+        <span class="slider"></span>
+      </label>
+      <span class="theme-icon">🌙</span>
+    </div>
+  </div>
+</div>
+
+<!-- User Manager Modal -->
+<div id="userManagerModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Manage Users</h3>
+      <button class="close-btn" onclick="toggleUserManager()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="add-user-form">
+        <input type="text" id="newUserInput" placeholder="Enter username">
+        <button onclick="addUser()">+ Add User</button>
+      </div>
+      <div class="users-list" id="usersList">
+        <!-- Users will be listed here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="add-task">
+  <input id="title" placeholder="Task title">
+  <select id="userSelect" class="user-select">
+    <option value="">Select user...</option>
+  </select>
+  <input id="due" type="datetime-local">
+  <button onclick="addTask()">Add Task</button>
+</div>
+
+<div class="board">
+  <div class="column" id="TODO"><h3>To Do</h3></div>
+  <div class="column" id="IN_PROGRESS"><h3>In Progress</h3></div>
+  <div class="column" id="DONE"><h3>Done</h3></div>
+  <div class="column" id="PAST_DUE"><h3>Past Due</h3></div>
+</div>
+
+<script src="admin_script.js"></script>
+
+</body>
+</html>
