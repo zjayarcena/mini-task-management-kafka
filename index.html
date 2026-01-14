@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mini Task Manager</title>
+<style>
+body { font-family: Arial; }
+.board { display: flex; gap: 20px; }
+.column { width: 30%; border: 1px solid black; padding: 10px; }
+.task { background:#eee; margin:5px; padding:5px; }
+</style>
+</head>
+<body>
+
+<h2>Kanban Board</h2>
+
+<input id="title" placeholder="Task">
+<input id="user" placeholder="Assigned To">
+<input id="due" type="date">
+<button onclick="addTask()">Add</button>
+
+<div class="board">
+  <div class="column" id="TODO"><h3>TODO</h3></div>
+  <div class="column" id="IN_PROGRESS"><h3>IN PROGRESS</h3></div>
+  <div class="column" id="DONE"><h3>DONE</h3></div>
+</div>
+
+<script>
+async function load(){
+  const res = await fetch("http://127.0.0.1:5000/tasks");
+  const data = await res.json();
+
+  ["TODO","IN_PROGRESS","DONE"].forEach(s=>{
+    document.getElementById(s).innerHTML="<h3>"+s+"</h3>";
+  });
+
+  data.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="task";
+    d.innerHTML = `${t.title}<br>${t.assigned_to}
+    <br>
+    <button onclick="move(${t.id},'IN_PROGRESS')">▶</button>
+    <button onclick="move(${t.id},'DONE')">✔</button>`;
+    document.getElementById(t.status).appendChild(d);
+  });
+}
+
+async function addTask(){
+  await fetch("http://127.0.0.1:5000/tasks",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      title:title.value,
+      assigned_to:user.value,
+      due_date:due.value
+    })
+  });
+  load();
+}
+
+async function move(id,status){
+  await fetch("http://127.0.0.1:5000/tasks/"+id,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({status})
+  });
+  load();
+}
+
+setInterval(load,1000);
+</script>
+
+</body>
+</html>
