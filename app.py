@@ -54,5 +54,34 @@ def update_task(task_id):
 
     return jsonify({"error": "Not found"}), 404
 
+@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    global tasks
+    
+    # Find the task to delete
+    task_to_delete = None
+    for task in tasks:
+        if task["id"] == task_id:
+            task_to_delete = task
+            break
+    
+    if task_to_delete: 
+        # Remove the task from the list
+        tasks = [task for task in tasks if task["id"] != task_id]
+        
+        # Send Kafka event
+        producer.send("task. deleted", {
+            "id":  task_id,
+            "title": task_to_delete["title"],
+            "deleted_at": datetime.now().isoformat()
+        })
+        
+        return jsonify({
+            "message": "Task deleted successfully",
+            "task":  task_to_delete
+        }), 200
+    
+    return jsonify({"error":  "Task not found"}), 404
+
 if __name__ == "__main__":
     app.run(debug=True)
