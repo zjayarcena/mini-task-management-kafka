@@ -16,52 +16,73 @@ function loadTheme() {
 }
 loadTheme();
 
-// User Management
-function loadUsers() {
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  return users;
+// User Management - Using API
+async function loadUsers() {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/users");
+    const users = await res.json();
+    return users;
+  } catch (error) {
+    console.error('Error loading users:', error);
+    return [];
+  }
 }
 
-function saveUsers(users) {
-  localStorage.setItem('users', JSON.stringify(users));
-  updateUserSelect();
-  renderUsersList();
-}
-
-function addUser() {
+async function addUser() {
   const input = document.getElementById('newUserInput');
   const username = input.value.trim();
   
-  if (! username) {
+  if (!username) {
     alert('Please enter a username');
     return;
   }
   
-  const users = loadUsers();
-  
-  // Check if user already exists
-  if (users.some(u => u.toLowerCase() === username.toLowerCase())) {
-    alert('User already exists');
+  try {
+    const response = await fetch("http://127.0.0.1:5000/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username })
+    });
+    
+    if (response.ok) {
+      input.value = '';
+      await updateUserSelect();
+      await renderUsersList();
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Failed to add user');
+    }
+  } catch (error) {
+    console.error('Error adding user:', error);
+    alert('Failed to add user');
+  }
+}
+
+async function deleteUser(userId, username) {
+  if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
     return;
   }
   
-  users.push(username);
-  saveUsers(users);
-  input.value = '';
-}
-
-function deleteUser(username) {
-  if (! confirm(`Are you sure you want to delete user "${username}"?`)) {
-    return;
+  try {
+    const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+      method: "DELETE"
+    });
+    
+    if (response.ok) {
+      await updateUserSelect();
+      await renderUsersList();
+    } else {
+      const error = await response.json();
+      alert(error.error || 'Failed to delete user');
+    }
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    alert('Failed to delete user');
   }
-  
-  const users = loadUsers();
-  const updatedUsers = users.filter(u => u !== username);
-  saveUsers(updatedUsers);
 }
 
-function renderUsersList() {
-  const users = loadUsers();
+async function renderUsersList() {
+  const users = await loadUsers();
   const container = document.getElementById('usersList');
   
   if (users.length === 0) {
@@ -73,23 +94,24 @@ function renderUsersList() {
     <div class="user-item">
       <div class="user-item-info">
         <div class="user-avatar">👤</div>
-        <span class="user-name">${user}</span>
+        <span class="user-name">${user.username}</span>
       </div>
-      <button class="delete-user-btn" onclick="deleteUser('${user}')">Delete</button>
+      <button class="delete-user-btn" onclick="deleteUser(${user.id}, '${user.username}')">Delete</button>
     </div>
   `).join('');
 }
 
-function updateUserSelect() {
-  const users = loadUsers();
+async function updateUserSelect() {
+  const users = await loadUsers();
   const select = document.getElementById('userSelect');
   const currentValue = select.value;
   
   select.innerHTML = '<option value="">Select user...</option>' + 
-    users.map(user => `<option value="${user}">${user}</option>`).join('');
+    users.map(user => `<option value="${user.username}">${user.username}</option>`).join('');
   
   // Restore previous selection if it still exists
-  if (users.includes(currentValue)) {
+  const userExists = users.some(user => user.username === currentValue);
+  if (userExists) {
     select.value = currentValue;
   }
 }
@@ -110,11 +132,6 @@ window.onclick = function(event) {
 
 // Initialize users on load
 updateUserSelect();
-
-// Add some default users if none exist
-if (loadUsers().length === 0) {
-  saveUsers(['user1', 'user2', 'user3']);
-}
 
 // Task Management
 async function load() {
@@ -193,7 +210,7 @@ async function addTask() {
     
     document.getElementById('title').value = '';
     document.getElementById('userSelect').value = '';
-    document. getElementById('due').value = '';
+    document.getElementById('due').value = '';
     load();
   } catch (error) {
     console.error('Error adding task:', error);
@@ -206,7 +223,7 @@ async function move(id, status) {
     await fetch("http://127.0.0.1:5000/tasks/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON. stringify({ status })
+      body: JSON.stringify({ status })
     });
     load();
   } catch (error) {

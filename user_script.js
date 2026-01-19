@@ -2,7 +2,7 @@
 function toggleTheme() {
   const html = document.documentElement;
   const currentTheme = html.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' :  'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
@@ -15,19 +15,58 @@ function loadTheme() {
   document.getElementById('themeToggle').checked = savedTheme === 'dark';
 }
 
+// User Management - Using API
+async function loadUsers() {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/users");
+    const users = await res.json();
+    return users;
+  } catch (error) {
+    console.error('Error loading users:', error);
+    return [];
+  }
+}
+
+// Update the user dropdown with available users
+async function updateUserDropdown() {
+  const users = await loadUsers();
+  const select = document.getElementById('userSelect');
+  const currentValue = select.value;
+  
+  let optionsHTML = '<option value="">Select your user...</option>';
+  
+  users.forEach(user => {
+    optionsHTML += `<option value="${user.username}">${user.username}</option>`;
+  });
+  
+  select.innerHTML = optionsHTML;
+  
+  // Restore previous selection if it still exists
+  const userExists = users.some(user => user.username === currentValue);
+  if (userExists) {
+    select.value = currentValue;
+  } else if (currentValue) {
+    // If the previously selected user was deleted, clear the selection
+    select.value = "";
+    localStorage.removeItem('username');
+  }
+}
+
 // Username management
 function saveUsername() {
-  const username = document. getElementById('userSelect').value;
+  const username = document.getElementById('userSelect').value;
   localStorage.setItem('username', username);
   console.log('Username saved:', username);
   load(); // Reload tasks when username changes
 }
 
-function loadUsername() {
+async function loadUsername() {
+  await updateUserDropdown();
   const savedUsername = localStorage.getItem('username') || '';
   document.getElementById('userSelect').value = savedUsername;
 }
 
+// Initialize
 loadTheme();
 loadUsername();
 
@@ -72,17 +111,17 @@ function playNotificationSound() {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
-    oscillator. connect(gainNode);
+    oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    oscillator. frequency.value = 800;
+    oscillator.frequency.value = 800;
     oscillator.type = 'sine';
     
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
     
-    oscillator. start(audioContext.currentTime);
-    oscillator.stop(audioContext. currentTime + 0.3);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
   } catch (error) {
     console.log('Could not play sound:', error);
   }
@@ -119,7 +158,7 @@ async function load() {
   
   if (!username) {
     // Show empty state if no username
-    ["TODO", "IN_PROGRESS", "DONE", "PAST_DUE"]. forEach(s => {
+    ["TODO", "IN_PROGRESS", "DONE", "PAST_DUE"].forEach(s => {
       const title =
         s === "TODO" ? "To Do" :  
         s === "IN_PROGRESS" ? "In Progress" :  
@@ -145,7 +184,7 @@ async function load() {
     const userTasks = data.filter(t => {
       const matches = t.assigned_to && 
                      t.assigned_to.toLowerCase().trim() === username.toLowerCase().trim();
-      console.log(`Task "${t.title}" assigned to "${t.assigned_to}" - matches "${username}":  ${matches}`);
+      console.log(`Task "${t.title}" assigned to "${t.assigned_to}" - matches "${username}": ${matches}`);
       return matches;
     });
 
@@ -162,7 +201,7 @@ async function load() {
 
     if (userTasks.length === 0) {
       // Show message if no tasks found
-      document. getElementById('TODO').innerHTML += `
+      document.getElementById('TODO').innerHTML += `
         <p style="text-align: center; color: var(--text-secondary); padding:2rem;">
           No tasks assigned to "${username}"
         </p>`;
@@ -184,7 +223,7 @@ async function load() {
         currentOverdueTasks.add(t.id);
         
         // Notify if task just became overdue (not on first load, and wasn't overdue before)
-        if (!isFirstLoad && !previousOverdueTasks.has(t. id)) {
+        if (!isFirstLoad && !previousOverdueTasks.has(t.id)) {
           showNotification(
             'overdue',
             '⚠️ Task Past Due! ',
@@ -202,7 +241,7 @@ async function load() {
       }
       
       // Check if this is a new task (not in previous load)
-      const isNewTask = !isFirstLoad && !previousTaskIds. has(t.id);
+      const isNewTask = !isFirstLoad && !previousTaskIds.has(t.id);
 
       const d = document.createElement("div");
       d.className = "task";
@@ -227,7 +266,7 @@ async function load() {
           const hoursOverdue = Math.abs(hoursLeft);
           const daysOverdue = Math.abs(daysLeft);
           if (daysOverdue > 0) {
-            timeInfo = `<span style="color: var(--danger); font-weight: 600;">⚠️ ${daysOverdue} day${daysOverdue > 1 ? 's' :  ''} overdue</span>`;
+            timeInfo = `<span style="color: var(--danger); font-weight: 600;">⚠️ ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue</span>`;
           } else {
             timeInfo = `<span style="color: var(--danger); font-weight: 600;">⚠️ ${hoursOverdue} hour${hoursOverdue > 1 ? 's' : ''} overdue</span>`;
           }
@@ -242,7 +281,7 @@ async function load() {
         <div class="task-title">${t.title}</div>
         <div class="task-meta">
           ${t.due_date ? '📅 ' + new Date(t.due_date).toLocaleString() : ''}
-          ${timeInfo ?  '<br>' + timeInfo : ''}
+          ${timeInfo ? '<br>' + timeInfo : ''}
         </div>
         <div class="task-actions">
           ${t.status === 'TODO' ?  
@@ -268,7 +307,7 @@ async function load() {
       } else {
         document.getElementById(t.status).appendChild(d);
         if (t.status === 'TODO') todoCount++;
-        if (t. status === 'IN_PROGRESS') inProgressCount++;
+        if (t.status === 'IN_PROGRESS') inProgressCount++;
         if (t.status === 'DONE') doneCount++;
       }
     });
